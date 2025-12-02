@@ -1,0 +1,22 @@
+# NEUP Log Sample - Sensor Data
+# Format: [timestamp] key:value key2=value2
+[0.0] temp:25.3 pressure=101.2 rpm:1500 voltage:12.5
+[0.5] temp:25.5 pressure=101.0 rpm:1502 voltage:12.4
+[1.0] temp:25.8 pressure=100.9 rpm:1498 voltage:12.6
+[1.5] temp:26.0 pressure=101.1 rpm:1505 voltage:12.5
+[2.0] temp:26.2 pressure=101.3 rpm:1501 voltage:12.3
+[2.5] temp:26.5 pressure=101.2 rpm:1499 voltage:12.7
+[3.0] temp:26.8 pressure=101.0 rpm:1503 voltage:12.4
+[3.5] temp:27.0 pressure=100.8 rpm:1497 voltage:12.6
+[4.0] temp:27.3 pressure=101.1 rpm:1504 voltage:12.5
+[4.5] temp:27.5 pressure=101.4 rpm:1500 voltage:12.3
+[5.0] temp:27.8 pressure=101.2 rpm:1502 voltage:12.8
+[5.5] temp:28.0 pressure=101.0 rpm:1498 voltage:12.4
+[6.0] temp:28.3 pressure=100.9 rpm:1506 voltage:12.7
+[6.5] temp:28.5 pressure=101.3 rpm:1501 voltage:12.5
+[7.0] temp:28.8 pressure=101.1 rpm:1499 voltage:12.6
+[7.5] temp:29.0 pressure=101.0 rpm:1503 voltage:12.4
+[8.0] temp:29.3 pressure=101.2 rpm:1497 voltage:12.8
+[8.5] temp:29.5 pressure=101.4 rpm:1505 voltage:12.5
+[9.0] temp:29.8 pressure=101.1 rpm:1500 voltage:12.3
+[9.5] temp:30.0 pressure=101.0 rpm:1502 voltage:12.7
