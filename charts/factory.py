@@ -1,6 +1,5 @@
 """
-图表工厂 - 动态生成 ECharts 配置
-根据不同的图表类型生成对应的 ECharts Options
+图表工厂 - 根据类型生成 ECharts 配置
 """
 
 from streamlit_echarts import st_echarts
@@ -9,7 +8,7 @@ from streamlit_echarts import st_echarts
 class ChartFactory:
     """图表渲染工厂"""
     
-    # 现代化配色方案
+    # 配色方案
     COLOR_PALETTE = [
         '#667eea', '#764ba2', '#f093fb', '#4facfe', 
         '#43e97b', '#38f9d7', '#f0932b', '#eb4d4b',
@@ -18,18 +17,7 @@ class ChartFactory:
     
     @staticmethod
     def render(chart_type, df, x_col, y_cols, height="500px", theme="light", **kwargs):
-        """
-        统一渲染入口
-        
-        Args:
-            chart_type: 图表类型 (line, bar, scatter, pie, area, radar, heatmap)
-            df: DataFrame数据源
-            x_col: X轴列名
-            y_cols: Y轴列名列表
-            height: 图表高度
-            theme: 主题 (light/dark)
-            **kwargs: 其他可选参数 (如 mark_line_val)
-        """
+        """统一渲染入口"""
         # 根据图表类型分发到不同的渲染器
         renderers = {
             "line": ChartFactory._render_line,
@@ -47,7 +35,6 @@ class ChartFactory:
         
         option = renderer(df, x_col, y_cols, theme, **kwargs)
         
-        # 渲染图表
         st_echarts(options=option, height=height, theme=theme)
     
     @staticmethod
