@@ -1,0 +1,155 @@
+# 图表类型测试数据集
+# 用于测试智能图表推荐系统的各种场景
+
+# ==========================================
+# 测试场景 1: 折线图 (时间序列趋势)
+# 推荐图表: 📈 折线图, 🏔️ 面积图
+# ==========================================
+[1.0] cpu_usage=45.2 memory_usage=62.3 disk_io=128.5
+[2.0] cpu_usage=48.7 memory_usage=63.1 disk_io=132.8
+[3.0] cpu_usage=52.3 memory_usage=64.5 disk_io=145.2
+[4.0] cpu_usage=49.1 memory_usage=63.8 disk_io=138.9
+[5.0] cpu_usage=46.5 memory_usage=62.9 disk_io=130.4
+[6.0] cpu_usage=50.8 memory_usage=65.2 disk_io=142.7
+[7.0] cpu_usage=54.2 memory_usage=66.8 disk_io=158.3
+[8.0] cpu_usage=51.6 memory_usage=65.4 disk_io=148.6
+[9.0] cpu_usage=47.9 memory_usage=63.7 disk_io=135.2
+[10.0] cpu_usage=49.3 memory_usage=64.2 disk_io=140.8
+
+# ==========================================
+# 测试场景 2: 柱状图 (分类对比)
+# 推荐图表: 📊 柱状图, 🥧 饼图
+# ==========================================
+[11.0] device_a=156 device_b=142 device_c=178 device_d=163 device_e=149
+[12.0] device_a=152 device_b=145 device_c=181 device_d=159 device_e=153
+[13.0] device_a=158 device_b=148 device_c=175 device_d=165 device_e=151
+[14.0] device_a=154 device_b=143 device_c=179 device_d=161 device_e=147
+[15.0] device_a=160 device_b=150 device_c=182 device_d=167 device_e=155
+
+# ==========================================
+# 测试场景 3: 散点图 (相关性分析)
+# 适合分析两个数值变量的关系
+# 推荐图表: 💠 散点图, 📈 折线图
+# ==========================================
+[16.0] temperature=25.3 pressure=101.2 humidity=65.8
+[17.0] temperature=26.1 pressure=101.5 humidity=63.2
+[18.0] temperature=25.8 pressure=101.3 humidity=64.5
+[19.0] temperature=27.2 pressure=101.8 humidity=61.9
+[20.0] temperature=26.5 pressure=101.6 humidity=62.7
+[21.0] temperature=25.9 pressure=101.4 humidity=64.1
+[22.0] temperature=28.1 pressure=102.1 humidity=59.8
+[23.0] temperature=26.8 pressure=101.7 humidity=62.3
+[24.0] temperature=25.6 pressure=101.3 humidity=65.2
+[25.0] temperature=27.5 pressure=101.9 humidity=61.5
+
+# ==========================================
+# 测试场景 4: 面积图 (累积量展示)
+# 强调数值的堆叠和总量
+# 推荐图表: 🏔️ 面积图, 📈 折线图
+# ==========================================
+[26.0] production_line1=245 production_line2=312 production_line3=289
+[27.0] production_line1=258 production_line2=325 production_line3=298
+[28.0] production_line1=242 production_line2=308 production_line3=285
+[29.0] production_line1=265 production_line2=338 production_line3=305
+[30.0] production_line1=251 production_line2=318 production_line3=292
+[31.0] production_line1=268 production_line2=342 production_line3=310
+[32.0] production_line1=255 production_line2=328 production_line3=301
+[33.0] production_line1=272 production_line2=351 production_line3=318
+[34.0] production_line1=261 production_line2=335 production_line3=307
+[35.0] production_line1=249 production_line2=321 production_line3=296
+
+# ==========================================
+# 测试场景 5: 雷达图 (多维评估)
+# 需要多个指标进行综合对比
+# 推荐图表: 🕸️ 雷达图, 🔥 热力图
+# ==========================================
+[36.0] reliability=85 efficiency=90 safety=95 cost_effectiveness=75 maintainability=88
+[37.0] reliability=88 efficiency=87 safety=92 cost_effectiveness=78 maintainability=85
+[38.0] reliability=82 efficiency=92 safety=89 cost_effectiveness=82 maintainability=90
+[39.0] reliability=90 efficiency=85 safety=94 cost_effectiveness=76 maintainability=87
+
+# ==========================================
+# 测试场景 6: 热力图 (时段密度)
+# 展示不同时段或分类的密集程度
+# 推荐图表: 🔥 热力图, 📊 柱状图
+# ==========================================
+[40.0] hour_00=23 hour_01=18 hour_02=15 hour_03=12 hour_04=16
+[41.0] hour_00=25 hour_01=20 hour_02=17 hour_03=14 hour_04=18
+[42.0] hour_00=22 hour_01=19 hour_02=16 hour_03=13 hour_04=17
+[43.0] hour_00=27 hour_01=22 hour_02=19 hour_03=16 hour_04=20
+
+# ==========================================
+# 测试场景 7: 多系列对比 (复杂场景)
+# 同时包含多个维度的数据
+# 推荐图表: 根据X/Y轴选择自动推荐
+# ==========================================
+[44.0] server1_cpu=45 server1_mem=62 server2_cpu=52 server2_mem=68 server3_cpu=48 server3_mem=65
+[45.0] server1_cpu=48 server1_mem=64 server2_cpu=55 server2_mem=71 server3_cpu=51 server3_mem=67
+[46.0] server1_cpu=42 server1_mem=60 server2_cpu=49 server2_mem=66 server3_cpu=46 server3_mem=63
+[47.0] server1_cpu=50 server1_mem=66 server2_cpu=58 server2_mem=73 server3_cpu=53 server3_mem=69
+[48.0] server1_cpu=46 server1_mem=63 server2_cpu=53 server2_mem=69 server3_cpu=49 server3_mem=66
+
+# ==========================================
+# 测试场景 8: 异常检测数据
+# 包含正常值和异常突变
+# ==========================================
+[49.0] sensor_value=100.2 threshold=120 status_code=0
+[50.0] sensor_value=102.5 threshold=120 status_code=0
+[51.0] sensor_value=101.8 threshold=120 status_code=0
+[52.0] sensor_value=135.6 threshold=120 status_code=1
+[53.0] sensor_value=138.2 threshold=120 status_code=1
+[54.0] sensor_value=103.4 threshold=120 status_code=0
+[55.0] sensor_value=100.9 threshold=120 status_code=0
+[56.0] sensor_value=142.7 threshold=120 status_code=1
+[57.0] sensor_value=101.5 threshold=120 status_code=0
+[58.0] sensor_value=102.1 threshold=120 status_code=0
+
+# ==========================================
+# 测试场景 9: 周期性数据
+# 展示明显的周期性规律
+# ==========================================
+[59.0] daily_traffic=850 weekly_avg=820 monthly_trend=800
+[60.0] daily_traffic=920 weekly_avg=825 monthly_trend=805
+[61.0] daily_traffic=780 weekly_avg=815 monthly_trend=810
+[62.0] daily_traffic=650 weekly_avg=805 monthly_trend=815
+[63.0] daily_traffic=580 weekly_avg=795 monthly_trend=820
+[64.0] daily_traffic=890 weekly_avg=810 monthly_trend=825
+[65.0] daily_traffic=950 weekly_avg=820 monthly_trend=830
+
+# ==========================================
+# 测试场景 10: 性能基准测试
+# 包含基准线和实际值的对比
+# ==========================================
+[66.0] actual_performance=95.2 baseline=90 target=100 upper_limit=110
+[67.0] actual_performance=92.8 baseline=90 target=100 upper_limit=110
+[68.0] actual_performance=98.5 baseline=90 target=100 upper_limit=110
+[69.0] actual_performance=87.3 baseline=90 target=100 upper_limit=110
+[70.0] actual_performance=103.6 baseline=90 target=100 upper_limit=110
+[71.0] actual_performance=96.9 baseline=90 target=100 upper_limit=110
+[72.0] actual_performance=91.2 baseline=90 target=100 upper_limit=110
+[73.0] actual_performance=99.8 baseline=90 target=100 upper_limit=110
+[74.0] actual_performance=94.5 baseline=90 target=100 upper_limit=110
+[75.0] actual_performance=97.3 baseline=90 target=100 upper_limit=110
+
+# ==========================================
+# 使用说明
+# ==========================================
+# 1. 在应用中上传此文件进行单文件分析
+# 2. 在自助数据探索模块中:
+#    - 选择 Timestamp 作为 X 轴 (时间序列)
+#    - 选择不同的参数组合作为 Y 轴
+#    - 观察系统推荐的图表类型
+# 
+# 3. 推荐测试组合:
+#    场景1: X=Timestamp, Y=cpu_usage,memory_usage → 折线图
+#    场景2: X=Timestamp, Y=device_a,device_b → 柱状图
+#    场景3: X=temperature, Y=pressure → 散点图
+#    场景4: X=Timestamp, Y=production_line1,production_line2,production_line3 → 面积图
+#    场景5: X=Timestamp, Y=reliability,efficiency,safety,cost_effectiveness → 雷达图
+#    场景6: X=Timestamp, Y=hour_00,hour_01,hour_02 → 热力图
+#
+# 4. 观察点:
+#    - 不同数据类型的自动识别
+#    - 图表推荐的准确性
+#    - 可视化效果的清晰度
+#    - 交互功能的流畅性

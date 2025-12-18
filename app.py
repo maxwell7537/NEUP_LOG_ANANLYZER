@@ -15,6 +15,10 @@ from templates.components import (
     render_chart_hint
 )
 
+# 导入智能图表分析模块
+from utils.chart_manager import ChartRuleEngine
+from charts.factory import ChartFactory
+
 # ==========================================
 # 配置与初始化
 # ==========================================
@@ -339,6 +343,124 @@ def render_single_dashboard(df, keys, parser):
     
     # 调用 ECharts 渲染函数
     render_echarts_line(df, 'Timestamp', keys, title="多参数趋势分析", mark_line_val=real_time)
+    
+    # ==========================================
+    # 3. 新增: 🛠️ 自助数据探索模块
+    # ==========================================
+    st.markdown("---")
+    st.markdown("### 🛠️ 自助数据探索")
+    st.caption("💡 根据数据类型智能推荐最合适的可视化图表")
+    
+    # 玻璃态容器
+    st.markdown('<div class="glass-container">', unsafe_allow_html=True)
+    
+    col1, col2, col3 = st.columns([1, 1, 1])
+    
+    with col1:
+        # 选择 X 轴 (维度)
+        # 推荐非纯数值列作为 X 轴
+        all_cols = df.columns.tolist()
+        x_axis = st.selectbox(
+            "🔹 选择维度 (X轴)", 
+            options=all_cols,
+            index=all_cols.index('Timestamp') if 'Timestamp' in all_cols else 0,
+            help="选择作为横轴的数据列,通常为时间或分类"
+        )
+    
+    with col2:
+        # 选择 Y 轴 (指标) - 支持多选
+        # 过滤出数值列作为推荐
+        numeric_cols = [c for c in df.columns if pd.api.types.is_numeric_dtype(df[c]) and c != x_axis]
+        default_y = numeric_cols[:min(2, len(numeric_cols))] if numeric_cols else []
+        
+        y_axis = st.multiselect(
+            "🔹 选择指标 (Y轴)", 
+            options=numeric_cols, 
+            default=default_y,
+            help="支持选择多个数值指标进行对比分析"
+        )
+    
+    with col3:
+        # 核心逻辑: 动态更新图表选项
+        if x_axis and y_axis:
+            # 调用规则引擎获取可用图表
+            valid_charts = ChartRuleEngine.get_valid_charts(df, x_axis, y_axis)
+            
+            if valid_charts:
+                # 构建显示用的标签 (Icon + Name)
+                chart_options = {
+                    k: f"{ChartRuleEngine.CHART_DEFINITIONS[k]['icon']} {ChartRuleEngine.CHART_DEFINITIONS[k]['name']}" 
+                    for k in valid_charts
+                }
+                
+                selected_chart_key = st.selectbox(
+                    "🔹 选择可视化类型", 
+                    options=valid_charts,
+                    format_func=lambda x: chart_options[x],
+                    help="系统根据数据类型智能推荐适合的图表"
+                )
+            else:
+                selected_chart_key = None
+                st.warning("⚠️ 当前选择的数据组合无合适的图表推荐")
+        else:
+            selected_chart_key = None
+            st.info("👆 请先选择 X 轴和 Y 轴数据列")
+    
+    st.markdown('</div>', unsafe_allow_html=True)
+    
+    # 渲染区域
+    if selected_chart_key and x_axis and y_axis:
+        st.markdown("---")
+        chart_info = ChartRuleEngine.get_chart_info(selected_chart_key)
+        
+        # 显示图表信息和推荐理由
+        col_title, col_reason = st.columns([2, 1])
+        with col_title:
+            st.subheader(f"{chart_info['icon']} {chart_info['name']}")
+        with col_reason:
+            reason = ChartRuleEngine.get_recommendation_reason(df, x_axis, y_axis, selected_chart_key)
+            st.markdown(f'<div class="chart-recommendation">💡 {reason}</div>', unsafe_allow_html=True)
+        
+        # 显示图表描述
+        st.caption(chart_info.get('description', ''))
+        
+        # 动态渲染图表
+        try:
+            # 获取当前主题
+            current_theme = st.session_state.get('theme', 'light')
+            
+            ChartFactory.render(
+                chart_type=selected_chart_key,
+                df=df,
+                x_col=x_axis,
+                y_cols=y_axis,
+                height="500px",
+                theme=current_theme
+            )
+            
+            # 数据洞察提示
+            st.markdown("---")
+            with st.expander("🤖 AI 数据洞察", expanded=False):
+                st.info(f"""
+                **当前分析**: {', '.join(y_axis)} vs {x_axis}
+                
+                **数据特征**:
+                - X轴类型: {ChartRuleEngine.detect_col_type(df, x_axis)}
+                - Y轴数量: {len(y_axis)}
+                - 数据点数: {len(df)}
+                
+                **建议**:
+                - 可尝试切换不同的图表类型观察数据
+                - 使用图表的缩放功能深入分析局部趋势
+                - 对比多个指标时注意数值量级差异
+                """)
+                
+                if st.button("🔍 生成智能分析报告 (Coming Soon)", key="ai_analyze"):
+                    st.toast("🚧 AI 分析功能开发中...", icon="⚡")
+        
+        except Exception as e:
+            st.error(f"图表渲染失败: {str(e)}")
+            st.code(f"错误详情:\n{e}", language="python")
 
 # ==========================================
 # 主程序入口

@@ -263,3 +263,62 @@ pre {
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
     z-index: 9999;
 }
+
+/* ==========================================
+   响应式布局优化 (Dark 主题)
+   ========================================== */
+
+/* 平板屏幕 */
+@media (max-width: 1024px) {
+    [data-testid="stSidebar"] {
+        background: rgba(14, 17, 23, 0.98) !important;
+    }
+    
+    .main .block-container {
+        padding: 1.5rem 2rem;
+    }
+    
+    .stButton > button {
+        padding: 0.6rem 1.5rem;
+        font-size: 16px;
+    }
+}
+
+/* 手机屏幕 */
+@media (max-width: 768px) {
+    [data-testid="stSidebar"] {
+        background: rgba(14, 17, 23, 0.98) !important;
+        box-shadow: 2px 0 20px rgba(0,0,0,0.5);
+    }
+    
+    .main .block-container {
+        padding: 1rem;
+        background: #0e1117;
+    }
+    
+    .stButton > button {
+        width: 100%;
+        padding: 0.8rem;
+    }
+    
+    h1 {
+        font-size: 1.5rem !important;
+    }
+    
+    h2 {
+        font-size: 1.2rem !important;
+    }
+}
+
+/* 触摸设备优化 (Dark) */
+@media (hover: none) and (pointer: coarse) {
+    .stButton > button {
+        min-height: 44px;
+        background: linear-gradient(135deg, #667eea, #764ba2);
+    }
+    
+    /* 移除 hover 效果 */
+    .stButton > button:hover::before {
+        display: none;
+    }
+}

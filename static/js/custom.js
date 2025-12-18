@@ -5,10 +5,22 @@
  * - 增强图表交互
  * - 快捷键支持
  * - 数据导出辅助
+ * - 响应式布局优化
+ * - 虚拟滚动支持
+ * - 性能优化 (防抖/节流)
  */
 
 (function() {
     'use strict';
+
+    // 全局配置
+    const CONFIG = {
+        MOBILE_BREAKPOINT: 768,
+        TABLET_BREAKPOINT: 1024,
+        DEBOUNCE_DELAY: 200,
+        VIRTUAL_SCROLL_THRESHOLD: 1000,
+        VIRTUAL_SCROLL_BUFFER: 10
+    };
 
     // 等待页面加载完成
     window.addEventListener('load', function() {
@@ -18,6 +30,9 @@
         initKeyboardShortcuts();
         enhanceChartInteraction();
         addCustomTooltips();
+        initResponsiveLayout();
+        initPerformanceOptimization();
+        initVirtualScroll();
     });
 
     /**
@@ -51,28 +66,40 @@
     }
 
     /**
-     * 增强图表交互
+     * 增强图表交互 - 使用强化版 MutationObserver
+     * 监听 window.parent.document 以应对 Streamlit rerun 导致的 DOM 重置
      */
     function enhanceChartInteraction() {
-        // 监听 ECharts 容器
-        const observer = new MutationObserver(function(mutations) {
+        // 尝试监听父窗口（iframe 场景）
+        const targetDocument = window.parent ? window.parent.document : document;
+        
+        const observer = new MutationObserver(debounce(function(mutations) {
             mutations.forEach(function(mutation) {
                 if (mutation.addedNodes.length) {
+                    // 重新绑定图表控件
                     const chartContainers = document.querySelectorAll('.streamlit-echarts');
                     chartContainers.forEach(function(container) {
                         if (!container.dataset.enhanced) {
                             container.dataset.enhanced = 'true';
                             addChartControls(container);
+                            console.log('📊 图表控件已注入');
                         }
                     });
+                    
+                    // 重新绑定虚拟滚动
+                    checkAndInitVirtualScroll();
                 }
             });
-        });
+        }, 100)); // 使用防抖避免过度触发
 
-        observer.observe(document.body, {
+        // 监听整个文档树
+        observer.observe(targetDocument.body || document.body, {
             childList: true,
-            subtree: true
+            subtree: true,
+            attributes: false // 不监听属性变化，减少性能开销
         });
+        
+        console.log('👁️  MutationObserver 已启动，监听 DOM 变化');
     }
 
     /**
@@ -220,5 +247,306 @@
         }
     `;
     document.head.appendChild(style);
+
+    // ==========================================
+    // 工具函数库
+    // ==========================================
+
+    /**
+     * 防抖函数 (Debounce)
+     * 用于优化频繁触发的事件（如窗口 resize、输入框输入）
+     */
+    function debounce(func, wait) {
+        let timeout;
+        return function executedFunction() {
+            const context = this;
+            const args = arguments;
+            clearTimeout(timeout);
+            timeout = setTimeout(function() {
+                func.apply(context, args);
+            }, wait || CONFIG.DEBOUNCE_DELAY);
+        };
+    }
+
+    /**
+     * 节流函数 (Throttle)
+     * 用于限制高频事件的执行频率（如滚动事件）
+     */
+    function throttle(func, limit) {
+        let inThrottle;
+        return function() {
+            const context = this;
+            const args = arguments;
+            if (!inThrottle) {
+                func.apply(context, args);
+                inThrottle = true;
+                setTimeout(function() {
+                    inThrottle = false;
+                }, limit || CONFIG.DEBOUNCE_DELAY);
+            }
+        };
+    }
+
+    // ==========================================
+    // 响应式布局优化
+    // ==========================================
+
+    /**
+     * 初始化响应式布局
+     * 针对工业现场平板优化（iPad/Android Tablet）
+     */
+    function initResponsiveLayout() {
+        const mediaQueryMobile = window.matchMedia(`(max-width: ${CONFIG.MOBILE_BREAKPOINT}px)`);
+        const mediaQueryTablet = window.matchMedia(`(max-width: ${CONFIG.TABLET_BREAKPOINT}px)`);
+
+        // 响应式处理函数
+        function handleResponsive() {
+            const sidebar = document.querySelector('[data-testid="stSidebar"]');
+            const mainContent = document.querySelector('.main');
+
+            if (mediaQueryMobile.matches) {
+                // 手机屏幕：自动收起侧边栏
+                if (sidebar) {
+                    sidebar.style.transform = 'translateX(-100%)';
+                    sidebar.style.transition = 'transform 0.3s ease';
+                }
+                console.log('📱 移动端模式：侧边栏已收起');
+            } else if (mediaQueryTablet.matches) {
+                // 平板屏幕：侧边栏缩小
+                if (sidebar) {
+                    sidebar.style.width = '250px';
+                    sidebar.style.transition = 'width 0.3s ease';
+                }
+                console.log('📱 平板模式：侧边栏已缩小');
+            } else {
+                // 桌面屏幕：恢复默认
+                if (sidebar) {
+                    sidebar.style.transform = 'translateX(0)';
+                    sidebar.style.width = '';
+                }
+            }
+
+            // 图表自适应调整
+            resizeCharts();
+        }
+
+        // 监听媒体查询变化
+        mediaQueryMobile.addListener(handleResponsive);
+        mediaQueryTablet.addListener(handleResponsive);
+
+        // 初始化执行
+        handleResponsive();
+
+        // 添加侧边栏切换按钮（移动端）
+        addSidebarToggle();
+
+        console.log('📐 响应式布局已启用');
+    }
+
+    /**
+     * 添加侧边栏切换按钮（移动端）
+     */
+    function addSidebarToggle() {
+        const toggleBtn = document.createElement('button');
+        toggleBtn.innerHTML = '☰';
+        toggleBtn.className = 'sidebar-toggle-btn';
+        toggleBtn.style.cssText = `
+            position: fixed;
+            top: 10px;
+            left: 10px;
+            z-index: 9999;
+            background: rgba(102, 126, 234, 0.95);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            width: 40px;
+            height: 40px;
+            font-size: 20px;
+            cursor: pointer;
+            display: none;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+            transition: all 0.3s ease;
+        `;
+
+        toggleBtn.addEventListener('click', function() {
+            const sidebar = document.querySelector('[data-testid="stSidebar"]');
+            if (sidebar) {
+                const isHidden = sidebar.style.transform === 'translateX(-100%)';
+                sidebar.style.transform = isHidden ? 'translateX(0)' : 'translateX(-100%)';
+            }
+        });
+
+        document.body.appendChild(toggleBtn);
+
+        // 仅在移动端显示
+        const mediaQuery = window.matchMedia(`(max-width: ${CONFIG.MOBILE_BREAKPOINT}px)`);
+        function updateToggleBtnVisibility() {
+            toggleBtn.style.display = mediaQuery.matches ? 'block' : 'none';
+        }
+        mediaQuery.addListener(updateToggleBtnVisibility);
+        updateToggleBtnVisibility();
+    }
+
+    /**
+     * 调整图表尺寸（应用防抖）
+     */
+    const resizeCharts = debounce(function() {
+        const chartContainers = document.querySelectorAll('.streamlit-echarts');
+        chartContainers.forEach(function(container) {
+            const chartInstance = window.echarts && window.echarts.getInstanceByDom(container);
+            if (chartInstance) {
+                chartInstance.resize();
+            }
+        });
+        console.log('📊 图表已重新调整尺寸');
+    }, CONFIG.DEBOUNCE_DELAY);
+
+    // ==========================================
+    // 性能优化
+    // ==========================================
+
+    /**
+     * 初始化性能优化
+     */
+    function initPerformanceOptimization() {
+        // 窗口 resize 事件防抖
+        window.addEventListener('resize', resizeCharts);
+
+        // 滚动事件节流
+        const scrollHandler = throttle(function() {
+            // 可以在这里添加滚动相关的逻辑
+            // 例如：懒加载、无限滚动等
+        }, 100);
+        window.addEventListener('scroll', scrollHandler);
+
+        console.log('⚡ 性能优化已启用（防抖/节流）');
+    }
+
+    // ==========================================
+    // 虚拟滚动实现
+    // ==========================================
+
+    /**
+     * 虚拟滚动类
+     * 用于优化大量 DOM 元素的渲染性能
+     */
+    class VirtualScroller {
+        constructor(container, items, renderItem, itemHeight = 30) {
+            this.container = container;
+            this.items = items;
+            this.renderItem = renderItem;
+            this.itemHeight = itemHeight;
+            this.visibleCount = Math.ceil(container.clientHeight / itemHeight) + CONFIG.VIRTUAL_SCROLL_BUFFER;
+            this.startIndex = 0;
+            
+            this.init();
+        }
+
+        init() {
+            // 创建容器
+            this.viewport = document.createElement('div');
+            this.viewport.style.cssText = `
+                height: ${this.container.clientHeight}px;
+                overflow-y: auto;
+                position: relative;
+            `;
+
+            this.content = document.createElement('div');
+            this.content.style.cssText = `
+                height: ${this.items.length * this.itemHeight}px;
+                position: relative;
+            `;
+
+            this.viewport.appendChild(this.content);
+            this.container.innerHTML = '';
+            this.container.appendChild(this.viewport);
+
+            // 绑定滚动事件
+            this.viewport.addEventListener('scroll', throttle(() => {
+                this.render();
+            }, 50));
+
+            // 初始渲染
+            this.render();
+            console.log(`📜 虚拟滚动已初始化: ${this.items.length} 条数据`);
+        }
+
+        render() {
+            const scrollTop = this.viewport.scrollTop;
+            this.startIndex = Math.floor(scrollTop / this.itemHeight);
+            const endIndex = Math.min(this.startIndex + this.visibleCount, this.items.length);
+
+            // 清空当前内容
+            this.content.innerHTML = '';
+
+            // 仅渲染可见区域
+            for (let i = this.startIndex; i < endIndex; i++) {
+                const item = document.createElement('div');
+                item.style.cssText = `
+                    position: absolute;
+                    top: ${i * this.itemHeight}px;
+                    height: ${this.itemHeight}px;
+                    width: 100%;
+                    box-sizing: border-box;
+                `;
+                item.innerHTML = this.renderItem(this.items[i], i);
+                this.content.appendChild(item);
+            }
+        }
+    }
+
+    /**
+     * 初始化虚拟滚动
+     */
+    function initVirtualScroll() {
+        checkAndInitVirtualScroll();
+    }
+
+    /**
+     * 检查并初始化虚拟滚动（可重复调用）
+     */
+    function checkAndInitVirtualScroll() {
+        // 查找日志文本容器
+        const logContainers = document.querySelectorAll('pre, code, .stCodeBlock');
+        
+        logContainers.forEach(function(container) {
+            if (container.dataset.virtualScrollEnabled) {
+                return; // 已处理过
+            }
+
+            const lines = container.textContent.split('\n');
+            
+            // 仅对超过阈值的大数据启用虚拟滚动
+            if (lines.length > CONFIG.VIRTUAL_SCROLL_THRESHOLD) {
+                container.dataset.virtualScrollEnabled = 'true';
+                
+                // 创建虚拟滚动实例
+                new VirtualScroller(
+                    container,
+                    lines,
+                    function(line, index) {
+                        return `<span style="color: #666; margin-right: 10px;">${index + 1}</span>${escapeHtml(line)}`;
+                    },
+                    20
+                );
+                
+                console.log(`📜 已对 ${lines.length} 行数据启用虚拟滚动`);
+            }
+        });
+    }
+
+    /**
+     * HTML 转义
+     */
+    function escapeHtml(text) {
+        const map = {
+            '&': '&amp;',
+            '<': '&lt;',
+            '>': '&gt;',
+            '"': '&quot;',
+            "'": '&#039;'
+        };
+        return text.replace(/[&<>"']/g, function(m) { return map[m]; });
+    }
 
 })();
