@@ -1,0 +1,46 @@
+# Frame layout configuration converted from C struct
+# header/footer values are configurable. Default uses HEAD=0xa5 and FOOTER=0x89
+
+header: 0xA5            # frame start byte (matches log.h: 0xA5)
+footer: 0xB9            # frame end byte (matches log.h: endheader 0xB9)
+endianness: little      # byte order for multi-byte integers
+
+# CRC settings
+crc:
+  enabled: true
+  type: crc-16-ccitt   # supported: crc-16-ccitt (default)
+  length: 2
+
+# Field layout in order (after header)
+fields:
+  - name: type
+    type: uint8
+    description: "frame type" 
+    default: 6
+
+  - name: Tx_Buf
+    type: bytes
+    length: 600
+    description: "payload buffer (内部使用 0xA7 作为 item 分隔符，格式: 0xA7 id data... 以 0xA7 标记结尾)"
+
+  - name: time_stamp
+    type: uint64
+    description: "timestamp (uint64)"
+
+  - name: frame_id
+    type: int16
+    description: "frame id"
+
+  - name: endheader
+    type: uint8
+    value: 0xB9
+    description: "end header / footer (matches log.h)"
+
+  - name: CRC16CheckSum
+    type: uint16
+    description: "CRC16 checksum (2 bytes, follows footer)"
+
+# Notes:
+# - Parsing logic assumes the layout above and that CRC (if enabled) follows the footer.
+# - If your real frames differ (variable length payloads, different CRC algorithm),
+#   update this file accordingly.

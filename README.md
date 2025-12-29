@@ -33,6 +33,10 @@ pip install -r requirements.txt
 
 # 3. 启动应用
 streamlit run app.py
+
+# 4. 格式转化
+python3 tool/transform.py -i examples/control_log.txt -c tool/config.yaml -o examples/control_log.parsed.json --format json
+
 ```
 
 访问地址: http://localhost:8501

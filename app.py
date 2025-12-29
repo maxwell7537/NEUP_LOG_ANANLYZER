@@ -99,18 +99,13 @@ class LogParser:
 # ECharts 绘图辅助函数 (新增)
 # ==========================================
 def render_echarts_line(df, x_col, y_cols, title="趋势图", mark_line_val=None):
-    """
-    通用 ECharts 折线图渲染器
-    """
     # 颜色盘
     colors = ['#667eea', '#764ba2', '#f093fb', '#4facfe', '#43e97b', '#f0932b', '#eb4d4b']
-    
     series_list = []
     legend_data = []
 
     # 将 Pandas 数据列转换为 List
     x_data = df[x_col].tolist()
-
     for i, col in enumerate(y_cols):
         series_list.append({
             "name": col,
@@ -159,7 +154,9 @@ def render_echarts_line(df, x_col, y_cols, title="趋势图", mark_line_val=None
             "boundaryGap": False,
             "data": x_data,
             "axisLine": {"lineStyle": {"color": "#ccc"}},
-            "axisLabel": {"color": "#666"}
+            # 使横轴更紧凑：对齐刻度、自动间隔、并允许旋转以避免文字重叠
+            "axisTick": {"alignWithLabel": True},
+            "axisLabel": {"color": "#666", "interval": "auto", "rotate": 0}
         },
         "yAxis": {
             "type": "value",
@@ -187,7 +184,33 @@ def render_echarts_line(df, x_col, y_cols, title="趋势图", mark_line_val=None
         ],
         "series": series_list
     }
+    # 如果数据点很多，默认缩小横轴初始窗口以让点更密集（更小的横轴间距）
+    try:
+        n_points = len(x_data)
+        max_visible = 200  # 初始可见点数（视窗大小）
+        if n_points > max_visible:
+            # 更智能的默认视野：以时间均值为中心，展示尽可能多的数据点（最多 max_visible）
+            try:
+                x_floats = [float(v) for v in x_data]
+                mean_ts = sum(x_floats) / len(x_floats)
+                closest_idx = min(range(len(x_floats)), key=lambda i: abs(x_floats[i] - mean_ts))
+            except Exception:
+                closest_idx = n_points // 2
 
+            half = max_visible // 2
+            start_idx = max(0, closest_idx - half)
+            end_idx = min(n_points, start_idx + max_visible)
+            if end_idx - start_idx < max_visible:
+                start_idx = max(0, end_idx - max_visible)
+
+            start_pct = int(start_idx / n_points * 100)
+            end_pct = int(end_idx / n_points * 100)
+            option['dataZoom'][0]['start'] = max(0, start_pct)
+            option['dataZoom'][1]['start'] = max(0, start_pct)
+            option['dataZoom'][0]['end'] = min(100, end_pct)
+            option['dataZoom'][1]['end'] = min(100, end_pct)
+    except Exception:
+        pass
     # 渲染图表
     st_echarts(options=option, height="500px", theme="light")
 
@@ -321,7 +344,8 @@ def render_single_dashboard(df, keys, parser):
     
     col_ctrl, col_info = st.columns([2, 1])
     with col_ctrl:
-        current_time = st.slider("⏱️ 数据快照定位", min_time, max_time, min_time, step=step)
+            # 默认聚焦最近时间点，便于观察最新数据的细节
+            current_time = st.slider("⏱️ 数据快照定位", min_time, max_time, max_time, step=step)
     
     nearest_idx = (df['Timestamp'] - current_time).abs().idxmin()
     row = df.loc[nearest_idx]
